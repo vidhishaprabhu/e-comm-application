@@ -1,0 +1,31 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Banner;
+use App\Models\Product;
+use Illuminate\Database\Seeder;
+
+class DatabaseSeeder extends Seeder
+{
+    /**
+     * Seed the application's database.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        // \App\Models\User::factory(10)->create();
+        Banner::create([
+        'image_url' => 'http://localhost:8000/storage/banners/banner.jpg'
+        ]);
+        Banner::create([
+        'image_url' => 'http://localhost:8000/storage/banners/banner.jpg'
+        ]);
+        Banner::create([
+        'image_url' => 'http://localhost:8000/storage/banners/banner.jpg'
+        ]);
+        
+        
+    }
+}
