@@ -15,16 +15,22 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // \App\Models\User::factory(10)->create();
         Banner::create([
         'image_url' => 'http://localhost:8000/storage/banners/banner.jpg'
         ]);
-        Banner::create([
-        'image_url' => 'http://localhost:8000/storage/banners/banner.jpg'
-        ]);
-        Banner::create([
-        'image_url' => 'http://localhost:8000/storage/banners/banner.jpg'
-        ]);
+        
+        Product::create([
+        'name' => 'Smart Watch',
+        'price' => 3499.00,
+        'image' => 'http://localhost:8000/storage/products/smart-watch.jpg',
+        'description' => 'Smartwatch with heart rate monitor.'
+    ]);
+        Product::create([
+        'name' => 'HP Laptop',
+        'price' => 74499.00,
+        'image' => 'http://localhost:8000/storage/products/Laptop.jpg',
+        'description' => ''
+    ]);
         
         
     }

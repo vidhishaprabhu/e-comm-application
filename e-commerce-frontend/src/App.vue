@@ -1,7 +1,10 @@
 <template>
 <div id="app">
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark container-fluid px-4">
-  <a class="navbar-brand" href="#">E-Commerce</a>
+  <router-link to="/" class="navbar-brand d-flex align-items-center gap-2" style="font-weight:700">
+  Shopify
+</router-link>
+
   <div class="collapse navbar-collapse show">
     <ul class="navbar-nav ms-auto">
       <li class="nav-item">
@@ -25,6 +28,7 @@
 export default {
   name: 'App',
   components: {
+    
 
   }
 }
