@@ -16,7 +16,7 @@
       </div>
     </section>
 
-    <h3 style="font-weight:700">Categories</h3>
+    <h3 style="font-weight:700;text-align:center">Categories</h3>
     <div class="category-list">
       <button
         v-for="category in categories"
@@ -24,12 +24,13 @@
         @click="filterByCategory(category.name)"
         class="category-button"
       >
+      <FilterOutlined style="font-size: 20px; margin-right: 6px;color:blue" />
         {{ category.name }}
       </button>
     </div>
 
     <section>
-      <h3 style="font-weight:700">Products</h3>
+      <h3 style="font-weight:700;text-align:center">Products</h3>
       <div class="product-list">
         <div
           v-for="product in filteredProducts"
@@ -40,6 +41,18 @@
           <h4 style="font-weight:700;margin-top:40px">{{ product.name }}</h4>
           <p>₹{{ product.price }}</p>
           <p>{{ product.description }}</p>
+          <div class="my-3 d-flex justify-content-center">
+            <button @click="addToCart(product)" class="add-cart-btn">
+            Add to <ShoppingCartOutlined style="font-size:120%" /> 
+          </button>
+          
+          </div>
+          <div v-if="getQuantity(product.id) > 0" class="cart-quantity">
+            <span style="font-weight:bold">{{ getQuantity(product.id) }}</span>
+          </div>
+          <button @click="addToCart(product)" class="btn btn-danger fw-bold">
+            Delete From <ShoppingCartOutlined style="font-size: 20px; margin-right: 6px;" /> 
+          </button>
         </div>
       </div>
     </section>
@@ -48,15 +61,20 @@
 
 <script>
 import api from '../api';
-
+import { ShoppingCartOutlined,FilterOutlined } from '@ant-design/icons-vue';
 export default {
   name: 'Home',
+  components: {
+    ShoppingCartOutlined,
+    FilterOutlined
+  },
   data() {
     return {
       banners: [],
       categories: [],
       products: [],
       filteredProducts: [],
+      cart: []
     };
   },
   async mounted() {
@@ -71,6 +89,22 @@ export default {
     this.categories = [{ id: 0, name: 'All' }, ...catRes.data];
   },
   methods: {
+    addToCart(product) {
+    const existing = this.cart.find(item => item.id === product.id);
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      this.cart.push({ ...product, quantity: 1 });
+    }
+
+    // Optionally save to localStorage
+    localStorage.setItem('cart', JSON.stringify(this.cart));
+    alert(`${product.name} added to cart!`);
+  },
+  getQuantity(productId) {
+    const found = this.cart.find(item => item.id === productId);
+    return found ? found.quantity : 0;
+  },
     async filterByCategory(categoryName) {
       if (categoryName === 'All') {
         this.filteredProducts = this.products;
@@ -96,7 +130,6 @@ export default {
 </script>
 
 <style scoped>
-/* 🔹 Banner styles */
 .banner-scroll-wrapper {
   position: relative;
   overflow-x: hidden;
@@ -194,4 +227,24 @@ export default {
 .category-button:hover {
   background-color: #ffd166;
 }
+.add-cart-btn {
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  margin-top: 10px;
+  cursor: pointer;
+  border-radius: 6px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.add-cart-btn:hover {
+  background-color: #27ae60;
+}
+
 </style>
