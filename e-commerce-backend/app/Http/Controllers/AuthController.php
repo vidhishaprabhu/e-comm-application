@@ -52,7 +52,7 @@ class AuthController extends Controller
         if(!$user || !Hash::check($request->password, $user->password)){
             return response()->json(['error' => 'Invalid Credentials'], 401);
         }
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $token = $user->createToken('api-token')->plainTextToken;
         return response()->json([
             'user'=>$user,
             'token' => $token

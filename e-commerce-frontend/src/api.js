@@ -3,12 +3,13 @@ import axios from 'axios';
 const api = axios.create({
   baseURL: 'http://localhost:8000/api',
   headers: {
-    Accept: 'application/json'
+    'Accept': 'application/json'
   }
 });
 
+// Add auth token if logged in
 api.interceptors.request.use(config => {
-  const token = localStorage.getItem('auth_token'); // ✅ must match your key
+  const token = localStorage.getItem('api-token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -16,4 +17,3 @@ api.interceptors.request.use(config => {
 });
 
 export default api;
-

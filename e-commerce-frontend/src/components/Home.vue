@@ -1,5 +1,15 @@
 <template>
   <div>
+    <div class="cart-icon-wrapper">
+      <router-link to="/cart" class="cart-icon-wrapper">
+    <ShoppingCartOutlined class="cart-icon" />
+    <span v-if="cartCount > 0" class="cart-count-badge">{{ cartCount }}</span>
+  </router-link>
+      <div v-if="showCartPopup" class="cart-popup">
+    <p><strong>{{ cartCount }}</strong> items in your cart</p>
+    <button @click="goToCart" class="view-cart-btn">View Cart</button>
+  </div>
+    </div>
     <section>
       <div class="banner-scroll-wrapper">
         <button class="scroll-left" @click="scrollLeft">‹</button>
@@ -50,7 +60,7 @@
           <div v-if="getQuantity(product.id) > 0" class="cart-quantity">
             <span style="font-weight:bold">{{ getQuantity(product.id) }}</span>
           </div>
-          <button @click="addToCart(product)" class="btn btn-danger fw-bold">
+          <button @click="removeFromCart(product)" class="btn btn-danger fw-bold">
             Delete From <ShoppingCartOutlined style="font-size: 20px; margin-right: 6px;" /> 
           </button>
         </div>
@@ -70,11 +80,13 @@ export default {
   },
   data() {
     return {
+     showCartPopup: false,
       banners: [],
       categories: [],
       products: [],
       filteredProducts: [],
-      cart: []
+      cart: [],
+      cartCount:0
     };
   },
   async mounted() {
@@ -87,20 +99,41 @@ export default {
     this.filteredProducts = productRes.data;
 
     this.categories = [{ id: 0, name: 'All' }, ...catRes.data];
+    await this.loadCart();
   },
   methods: {
-    addToCart(product) {
-    const existing = this.cart.find(item => item.id === product.id);
-    if (existing) {
-      existing.quantity += 1;
+    toggleCartPopup() {
+      this.showCartPopup = !this.showCartPopup;
+    },
+    goToCart() {
+      this.$router.push('/cart');
+      this.showCartPopup = false;
+    },
+    async loadCart() {
+  try {
+    const res = await api.get('/cart');
+    this.cart = res.data;
+    this.cartCount = res.data.reduce((total, item) => total + item.quantity, 0);
+  } catch (error) {
+    console.error('Failed to load cart:', error);
+  }
+},
+    async addToCart(product) {
+  try {
+    await api.post('/cart/add', { product_id: product.id });
+    await this.loadCart();
+    alert('Product added to cart');
+  } catch (error) {
+    console.error('Add to cart failed:', error);
+    if (error.response && error.response.status === 401) {
+      alert('Please login to add to cart');
     } else {
-      this.cart.push({ ...product, quantity: 1 });
+      // Show a different alert for other types of errors
+      alert('Something went wrong while adding to cart.');
     }
+  }
+},
 
-    // Optionally save to localStorage
-    localStorage.setItem('cart', JSON.stringify(this.cart));
-    alert(`${product.name} added to cart!`);
-  },
   getQuantity(productId) {
     const found = this.cart.find(item => item.id === productId);
     return found ? found.quantity : 0;
@@ -125,6 +158,17 @@ export default {
       const row = this.$refs.bannerRow;
       row.scrollBy({ left: -300, behavior: 'smooth' });
     },
+    async removeFromCart(product) {
+  try {
+    await api.delete(`/cart/${product.id}`);
+    await this.loadCart(); 
+    alert('Product removed from cart');
+  } catch (error) {
+    console.error('Remove from cart failed:', error);
+    alert('Something went wrong while removing from cart.');
+  }
+}
+
   },
 };
 </script>
@@ -245,6 +289,64 @@ export default {
 
 .add-cart-btn:hover {
   background-color: #27ae60;
+}
+.cart-container {
+  display: flex;
+  justify-content: flex-end; /* ✅ Pushes it to the right */
+  align-items: center;
+  padding: 0 16px;
+}
+
+.cart-icon-wrapper {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.cart-icon {
+  font-size: 56px;
+  color: #333;
+}
+
+.cart-count-badge {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  background-color: #f5222d;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1;
+}
+.cart-popup {
+  position: absolute;
+  top: 45px;
+  right: 0;
+  background-color: white;
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  z-index: 100;
+  width: 160px;
+  text-align: center;
+}
+
+.popup-button {
+  background-color: #00b894;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 6px;
+}
+
+.popup-button:hover {
+  background-color: #019970;
 }
 
 </style>
