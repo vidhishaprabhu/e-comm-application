@@ -3,7 +3,7 @@
   <h2 style="text-align:center; font-weight:bold; font-size: 24px; color: #d9534f; background-color: #fff3cd; padding: 12px 20px; border: 1px solid #ffeeba; border-radius: 8px">Items in 🛒</h2>
 
   <div v-if="cart.length === 0" class="empty-cart">
-    <router-link to="/" style="font-weight: 700; font-size: 24px; color: #d9534f;  margin-bottom: 12px; display: inline-block;">
+    <router-link to="/" style="font-weight: bolder; font-size: 24px; color: red;  margin-bottom: 12px; display: inline-block;">
       Go Back To Home
     </router-link>
     <p style="font-weight: 700; font-size: 24px; color: #d9534f; background-color: #fff3cd; padding: 12px 20px; border: 1px solid #ffeeba; border-radius: 8px;">
@@ -32,12 +32,12 @@
   <div>
     <p style="font-weight:600; margin: 8px 0;">Total Price: ₹{{ totalPrice }}</p>
   </div>
-  <div style="text-align: center;">
+  <div style="text-align: center;" v-if="cart.length > 0">
     <p style="font-size: 120%; margin: 0 auto; max-width: 80%;">
       Shipping and taxes will be calculated at checkout
     </p>
   </div>
-  <div style="text-align: center;">
+  <div style="text-align: center;" v-if="cart.length > 0">
     <router-link to="/checkout-form"><button class="btn btn-danger mt-4" style="font-weight:700">Checkout</button></router-link>
   </div>
 

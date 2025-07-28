@@ -165,7 +165,7 @@ export default {
     alert('Product removed from cart');
   } catch (error) {
     console.error('Remove from cart failed:', error);
-    alert('Something went wrong while removing from cart.');
+    alert('Sorry the cart is empty!!!');
   }
 }
 
