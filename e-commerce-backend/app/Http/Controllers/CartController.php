@@ -38,8 +38,22 @@ class CartController extends Controller
         return response()->json(['message' => 'Added to cart']);
     }
 
-    public function remove(Request $request,$productId){
-        $request->user()->cart()->where('product_id', $productId)->delete();
-        return response()->json(['message' => 'Removed from cart']);
+    public function remove(Request $request, $productId)
+{
+    $cartItem = $request->user()->cart()->where('product_id', $productId)->first();
+
+    if (!$cartItem) {
+        return response()->json(['message' => 'Item not found in cart'], 404);
     }
+
+    if ($cartItem->quantity > 1) {
+        $cartItem->quantity -= 1;
+        $cartItem->save();
+    } else {
+        $cartItem->delete();
+    }
+
+    return response()->json(['message' => 'Item quantity updated or removed']);
+}
+
 }

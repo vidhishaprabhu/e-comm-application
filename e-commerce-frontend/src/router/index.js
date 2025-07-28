@@ -4,12 +4,14 @@ import ProductDetail from '../components/ProductDetail.vue';
 import Cart from '../components/Cart.vue';
 import Register from '../components/Register.vue';
 import Login from '../components/Login.vue';
+import CheckoutForm from '../components/CheckoutForm.vue';
 const routes = [
   { path: '/', name: 'Home', component: Home, meta: { requiresAuth: true } },
   { path: '/register', name: 'Register', component: Register },
   { path: '/login', name: 'Login', component: Login },
   { path: '/product/:id', name: 'ProductDetail', component: ProductDetail, meta: { requiresAuth: true } },
   { path: '/cart', name: 'Cart', component: Cart, meta: { requiresAuth: true } },
+  { path: '/checkout-form', name: 'CheckoutForm', component: CheckoutForm, meta: { requiresAuth: true } },
 ];
 
 const router = createRouter({
