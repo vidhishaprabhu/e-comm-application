@@ -21,7 +21,7 @@
 
   <!-- Step Content -->
   <div v-if="currentStep === 1">
-    <h4>Profile Details</h4>
+    <h4>{{ isEditingAddress ? 'Edit Profile Details' : 'Profile Details' }}</h4>
     <form @submit.prevent="handleShippingSubmit">
       <!-- Email -->
       <div class="form-group">
@@ -95,7 +95,7 @@
         <label>Billing Address is same as Shipping Address</label>
       </div>
 
-      <button type="submit" class="btn mt-3 my-3">Continue</button>
+      <button type="submit" class="btn mt-3 my-3">{{ isEditingAddress ? 'Update' : 'Continue' }}</button>
     </form>
   </div>
 
@@ -128,6 +128,7 @@ export default{
     return{
       userId:'',
       currentStep: parseInt(localStorage.getItem('checkout_step')) || 1,
+      isEditingAddress: false,
       errors:{},
       form: {
         email: '',
@@ -148,24 +149,27 @@ export default{
     const res = await api.get('/user'); // Get the logged-in user
     this.userId = res.data.id;
 
-    // Load last visited user ID
+    const userStepKey = `currentStep_${this.userId}`;
+    const userFormKey = `shippingForm_${this.userId}`;
     const lastVisitedUserId = localStorage.getItem('last_user_id');
 
-    // If new user, reset the step
-    if (lastVisitedUserId !== String(this.userId)) {
-      localStorage.setItem('currentStep_' + this.userId, '1');
-      localStorage.setItem('last_user_id', this.userId);
+    // Only set to step 1 if no step is saved for this user
+    const savedStep = localStorage.getItem(userStepKey);
+    if (!savedStep) {
+      localStorage.setItem(userStepKey, '1');
     }
 
-    // Load current step
-    const savedStep = localStorage.getItem(`currentStep_${this.userId}`);
+    // Save current user as last visited
+    localStorage.setItem('last_user_id', this.userId);
+
+    // Load current step and form
     this.currentStep = savedStep ? parseInt(savedStep) : 1;
 
-    // Load saved form if exists
-    const savedForm = localStorage.getItem(`shippingForm_${this.userId}`);
+    const savedForm = localStorage.getItem(userFormKey);
     if (savedForm) {
       this.form = JSON.parse(savedForm);
     }
+
   } catch (error) {
     console.error("User fetch failed", error);
   }
@@ -173,35 +177,26 @@ export default{
   methods: {
   goToAddressStep() {
     this.currentStep = 1; 
+    this.isEditingAddress = true;
     
   },
     nextStep() {
-      if (this.currentStep < 3) this.currentStep++;
-      localStorage.setItem('checkout_step', this.currentStep); 
-      this.currentStep = 2;
-      
-    },
+  if (this.currentStep < 3) {
+    this.currentStep++;
+    localStorage.setItem(`currentStep_${this.userId}`, String(this.currentStep)); // ✅ Store for current user
+  }
+},
     async handleShippingSubmit() {
   try {
-    this.errors = {}; // ✅ Clear first
-
-    // Basic frontend validation
-    if (!this.form.email) this.errors.email = "Email is required.";
-
-    // Check for errors
-    if (Object.keys(this.errors).length > 0) {
-      return; // Stop form submission
-    }
-
-    // Submit form
+    // Save data to backend
     await api.post('/shipping-address', this.form);
 
-    // Save progress
-    localStorage.setItem('shippingForm', JSON.stringify(this.form));
-    localStorage.setItem('currentStep', '2');
+    // ✅ Save step and form for this user
+    localStorage.setItem(`shippingForm_${this.userId}`, JSON.stringify(this.form));
+    localStorage.setItem(`currentStep_${this.userId}`, '2');
 
-    alert("Shipping address saved");
     this.currentStep = 2;
+    alert("Shipping address saved");
   } catch (error) {
     console.error(error);
     alert("Failed to save address");
