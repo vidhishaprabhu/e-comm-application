@@ -102,23 +102,54 @@
   <div v-else-if="currentStep === 2">
     <p style="font-weight:600">Want to Edit the Address ? .Click on <button class="btn btn-danger" @click="goToAddressStep">Change</button></p>
     <h3>Dispatch Options</h3>
-    <!-- your dispatch form here -->
-    <button class="btn">Continue</button>
+    <div class="form-group">
+  <label>
+    <input type="radio" value="standard" v-model="shippingOption" />
+    Standard Shipping (Free, 3–5 business days)
+  </label>
+</div>
+    <button class="btn" @click="nextStep">Continue</button>
   </div>
 
   <div v-else-if="currentStep === 3">
-    <h3>Review Order</h3>
-    <!-- your order summary here -->
-    <button @click="submitOrder">Submit</button>
+    <h3 style="text-align:center">Review Order</h3>
+
+<!-- ✅ Card container -->
+<div style="background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px;">
+  <h4 style="margin-bottom: 16px;">Payment Options</h4>
+
+  <div class="form-group">
+    <label>
+      <input type="radio" value="cash_on_delivery" v-model="paymentOption" />
+      Cash on Delivery
+    </label>
+  </div>
+
+  <div class="form-group">
+    <label>
+      <input type="radio" value="online_payment" v-model="paymentOption" />
+      Online Payment
+    </label>
+    <!-- Submit Button -->
+<div style="text-align: center;">
+  <button @click="submitOrder" class="btn" style="background-color:red;color:white">Complete Order</button>
+</div>
+
+  </div>
+</div>
+
+
+
   </div>
 </div>
 </div>
-<div class="cart-card" style="flex: 0.6; border: 1px solid #ccc; padding: 20px; border-radius: 8px;">
-  <h3 class="text-center">Order Summary</h3>
-
+<div style="text-align: center;">
+  <h3>Order Summary</h3>
+  <p>Subtotal: Rs {{ totalPrice }}</p>
+  <p>IGST (18%): Rs {{ igst }}</p>
+  <p><strong>Inclusive of tax: Rs {{ finalAmount }}</strong></p>
 </div>
 
-  
 </template>
 <script>
 import api from '../api';
@@ -126,9 +157,14 @@ export default{
   name:'CheckoutForm',
   data(){
     return{
+      paymentOption: 'cash_on_delivery',
       userId:'',
       currentStep: parseInt(localStorage.getItem('checkout_step')) || 1,
       isEditingAddress: false,
+      cart: [],
+      cartCount:0,
+      igst: 0,
+    finalAmount: 0,
       errors:{},
       form: {
         email: '',
@@ -169,12 +205,35 @@ export default{
     if (savedForm) {
       this.form = JSON.parse(savedForm);
     }
+    await this.loadCart();
 
   } catch (error) {
     console.error("User fetch failed", error);
   }
 },
   methods: {
+    async loadCart() {
+  try {
+    const res = await api.get('/cart');
+    this.cart = res.data;
+
+    this.cartCount = this.cart.reduce((total, item) => total + item.quantity, 0);
+
+    // Subtotal before tax
+    this.totalPrice = this.cart.reduce(
+      (sum, item) => sum + item.quantity * item.product.price,
+      0
+    );
+
+    // ✅ Calculate IGST at 18%
+    this.igst = parseFloat((this.totalPrice * 0.18).toFixed(2));
+
+    // ✅ Final amount after tax
+    this.finalAmount = parseFloat((this.totalPrice + this.igst).toFixed(2));
+  } catch (error) {
+    console.error('Failed to load cart', error);
+  }
+},
   goToAddressStep() {
     this.currentStep = 1; 
     this.isEditingAddress = true;

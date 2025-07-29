@@ -38,7 +38,6 @@
   <div style="text-align: center;" v-if="cart.length > 0">
     <router-link to="/checkout-form"><button class="btn btn-danger mt-4" style="font-weight:700">Checkout</button></router-link>
   </div>
-
 </div>
 </template>
 
@@ -55,6 +54,7 @@ export default {
   data() {
     return {
       cart: [],
+      cartCount:0,
       emptyCartStyle: {
         backgroundImage: "url('@/assets/empty-cart.jpg')",
         backgroundRepeat: "no-repeat",
